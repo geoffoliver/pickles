@@ -28,6 +28,11 @@
  */
 class Dynamic extends Object
 {
+
+	public static function getInstance($class='Dynamic'){
+		return parent::getInstance('Dynamic');
+	}
+
 	/**
 	 * Generate Reference
 	 *

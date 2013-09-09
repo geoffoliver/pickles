@@ -75,9 +75,9 @@ class Display_PHP extends Display_Common
 			$form_class    = (class_exists('CustomForm')    ? 'CustomForm'    : 'Form');
 			$html_class    = (class_exists('CustomHTML')    ? 'CustomHTML'    : 'HTML');
 
-			$__dynamic = new $dynamic_class();
-			$__form    = new $form_class();
-			$__html    = new $html_class();
+			$__dynamic = $dynamic_class::getInstance();
+			$__form    = $form_class::getInstance();
+			$__html    = $html_class::getInstance();
 
 			// Loads the template
 			if ($this->parent_template != null)

@@ -285,7 +285,7 @@ class Model extends Object
 	 * @access private
 	 * @var    string
 	 */
-	private $commit_type = 'row';
+	protected $commit_type = 'row';
 
 	// }}}
 	// {{{ Class Constructor
@@ -401,7 +401,7 @@ class Model extends Object
 					throw new Exception('You cannot pass in 2 query parameter arrays');
 				}
 
-				if ($this->columns['is_deleted'])
+				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $type_or_parameters['conditions']))
 				{
 					$type_or_parameters['conditions'][$this->columns['is_deleted']] = '0';
 				}
@@ -410,7 +410,7 @@ class Model extends Object
 			}
 			elseif (is_array($parameters))
 			{
-				if ($this->columns['is_deleted'])
+				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters['conditions']))
 				{
 					$parameters['conditions'][$this->columns['is_deleted']] = '0';
 				}
@@ -422,7 +422,7 @@ class Model extends Object
 				$cache_key  = $this->model . '-' . $type_or_parameters;
 				$parameters = array($this->columns['id'] => $type_or_parameters);
 
-				if ($this->columns['is_deleted'])
+				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters))
 				{
 					$parameters[$this->columns['is_deleted']] = '0';
 				}
@@ -434,7 +434,7 @@ class Model extends Object
 				$cache_key  = $this->model . '-' . $parameters;
 				$parameters = array($this->columns['id'] => $parameters);
 
-				if ($this->columns['is_deleted'])
+				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters))
 				{
 					$parameters[$this->columns['is_deleted']] = '0';
 				}
