@@ -187,6 +187,28 @@ abstract class Display_Common extends Object
 	{
 		return true;
 	}
+	
+	/**
+	 * Element
+	 *
+	 * Includes a template from the __shared/elements directory and renders it 
+	 * out like a regular template
+	 *
+	 * @return String an empty string if there was a problem, otherwise the 
+	 * rendered element
+	 */
+	public function element($filename=false){
+		$el = '';
+		if($filename){
+			$tplFile = SITE_TEMPLATE_PATH.'__shared/elements/'.$filename;
+			if(file_exists($tplFile)){
+				$this->parent_template = null;
+				$this->child_template = $tplFile;
+				$el = $this->render();
+			}
+		}
+		return $el;
+	}
 
 	/**
 	 * Rendering Method
