@@ -70,9 +70,9 @@ class Display_PHP extends Display_Common
 			// {{{ Old scope, magic variables
 
 			// Puts the class variables in local scope of the template
-			$__dynamic   = new $dynamic_class();
-			$__form      = new $form_class();
-			$__html      = new $html_class();
+			$__dynamic   = $dynamic_class::getInstance();
+			$__form      = $form_class::getInstance();
+			$__html      = $html_class::getInstance();
 			$__config    = $this->config;
 			$__meta      = $this->meta_data;
 			$__module    = $this->module_return;
@@ -82,11 +82,6 @@ class Display_PHP extends Display_Common
 
 			// }}}
 			// {{{ New scope, class variables
-
-			$__dynamic = $dynamic_class::getInstance();
-			$__form    = $form_class::getInstance();
-			$__html    = $html_class::getInstance();
-			
 			$this->dynamic   = &$__dynamic;
 			$this->form      = &$__form;
 			$this->html      = &$__html;
