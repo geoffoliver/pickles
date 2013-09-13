@@ -424,9 +424,6 @@ class Model extends Object
 					throw new Exception('You cannot pass in 2 query parameter arrays');
 				}
 
-<<<<<<< HEAD
-				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $type_or_parameters['conditions']))
-=======
 				if ($this->use_cache && isset($type_or_parameters['conditions'])
 					&& count($type_or_parameters['conditions']) == 1)
 				{
@@ -446,8 +443,7 @@ class Model extends Object
 					}
 				}
 
-				if ($this->columns['is_deleted'])
->>>>>>> upstream/master
+				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $type_or_parameters['conditions']))
 				{
 					$type_or_parameters['conditions'][$this->columns['is_deleted']] = '0';
 				}
