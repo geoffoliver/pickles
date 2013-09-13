@@ -267,28 +267,29 @@ class Dynamic extends Object
 				if (file_exists($original_filename))
 				{
 					$reference = $original_reference;
-
-					if (is_writable($path)
-						&& (!file_exists($minified_filename) || filemtime($original_filename) > filemtime($minified_filename))
-						&& extension_loaded('curl')
-						&& $this->config->pickles['minify'] === true)
-					{
-						exec('java -jar ' . PICKLES_PATH . 'vendors/google/closure-compiler/compiler.jar --js=' . $original_filename . ' --compilation_level='  . ($level . '_' . ($level == 'WHITESPACE' ? 'ONLY' : 'OPTIMIZATIONS')) . ' --js_output_file=' . $minified_filename);
-
-						$reference = $minified_reference;
-					}
-					elseif (file_exists($minified_filename))
-					{
-						$reference = $minified_reference;
-					}
-					else
-					{
-						if ($this->config->pickles['logging'] === true)
+				
+					if ($this->config->pickles['minify'] === true){
+						if (is_writable($path)
+							&& (!file_exists($minified_filename) || filemtime($original_filename) > filemtime($minified_filename))
+							&& extension_loaded('curl')
+							&& $this->config->pickles['minify'] === true)
 						{
-							Log::warning('Unable to minify ' . $original_reference . ' and a minified copy does not already exist');
+							exec('java -jar ' . PICKLES_PATH . 'vendors/google/closure-compiler/compiler.jar --js=' . $original_filename . ' --compilation_level='  . ($level . '_' . ($level == 'WHITESPACE' ? 'ONLY' : 'OPTIMIZATIONS')) . ' --js_output_file=' . $minified_filename);
+
+							$reference = $minified_reference;
+						}
+						elseif (file_exists($minified_filename))
+						{
+							$reference = $minified_reference;
+						}
+						else
+						{
+							if ($this->config->pickles['logging'] === true)
+							{
+								Log::warning('Unable to minify ' . $original_reference . ' and a minified copy does not already exist');
+							}
 						}
 					}
-
 					$reference = $this->reference($reference);
 				}
 				else
