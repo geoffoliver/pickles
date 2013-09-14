@@ -125,6 +125,7 @@ class Display_PHP extends Display_Common
 		}
 		else
 		{
+			HEADER('Content-Type: application/json');
 			echo Convert::toJSON($this->module_return);
 		}
 	}

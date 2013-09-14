@@ -27,6 +27,7 @@ class Display_JSON extends Display_Common
 	 */
 	public function render()
 	{
+		HEADER('Content-Type: application/json');
 		echo Convert::toJSON($this->module_return);
 	}
 }
