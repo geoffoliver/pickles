@@ -78,8 +78,13 @@ class Form extends Object
 		{
 			$additional .= ' class="' . $classes . '"';
 		}
+		
+		$idAttr = '';
+		if(strpos($additional, 'id=') === false){
+			$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+		}
 
-		return '<input type="' . $type . '" name="' . $name . '" id="' . $name . '"' . $additional . ' />';
+		return '<input type="' . $type . '" name="' . $name . '" '.$idAttr. $additional . ' />';
 	}
 
 	// }}}
@@ -306,8 +311,13 @@ class Form extends Object
 		{
 			$additional .= ' class="' . $classes . '"';
 		}
+		
+		$idAttr = '';
+		if(strpos($additional, 'id=') === false){
+			$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+		}
 
-		return '<textarea name="' . $name . '" id="' . $name . '"' . $additional . '>' . $value . '</textarea>';
+		return '<textarea name="' . $name . '" '. $idAttr . $additional . '>' . $value . '</textarea>';
 	}
 
 	// }}}
@@ -337,7 +347,12 @@ class Form extends Object
 			$additional .= ' class="' . $classes . '"';
 		}
 
-		return '<select id="' . $name . '" name="' . $name . '" class="' . $classes . '"' . $additional . '>' . $this->options($options, $selected) . '</select>';
+		$idAttr = '';
+		if(strpos($additional, 'id=') === false){
+			$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+		}
+
+		return '<select ' . $idAttr . ' name="' . $name . '" class="' . $classes . '"' . $additional . '>' . $this->options($options, $selected) . '</select>';
 	}
 
 	// }}}
@@ -669,8 +684,13 @@ class Form extends Object
 		$html = '';
 		foreach ($parts as $part => $size)
 		{
+			$idAttr = '';
+			if(strpos($additional, 'id=') === false){
+				$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+			}
+
 			$html .= ($html != '' ? ' ' : '');
-			$html .= '<input type="input" name="' . $name . '[' . $part . ']" id="' . $name . '[' . $part . ']" value="' . $value[$part] . '" minlength="' . $size . '" maxlength="' . $size . '"' . $additional . ' />';
+			$html .= '<input type="input" name="' . $name . '[' . $part . ']" ' . $idAttr . ' value="' . $value[$part] . '" minlength="' . $size . '" maxlength="' . $size . '"' . $additional . ' />';
 		}
 
 		return $html;
