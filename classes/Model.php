@@ -400,9 +400,10 @@ class Model extends Object
 	 * Potentially populates the record set from the passed arguments.
 	 *
 	 * @param mixed $type_or_parameters optional type of query or parameters
-	 * @param array $parameters optional data to create a query from
+	 * @param mixed $parameter_or_key optional data to create query or cache key
+	 * @param string $passed_key optional key to use for caching
 	 */
-	public function execute($type_or_parameters = null, $parameters = null)
+	public function execute($type_or_parameters = null, $parameters_or_key = null, $passed_key = null)
 	{
 		// Resets internal properties
 		foreach ($this->snapshot as $variable => $value)
@@ -416,27 +417,52 @@ class Model extends Object
 			// Loads the parameters into the object
 			if (is_array($type_or_parameters))
 			{
-				if (is_array($parameters))
+				if (is_array($parameters_or_key))
 				{
 					throw new Exception('You cannot pass in 2 query parameter arrays');
 				}
 
-				if ($this->use_cache && isset($type_or_parameters['conditions'])
+				$this->prepareParameters($type_or_parameters);
+
+				if ($this->use_cache
+					&& isset($type_or_parameters['conditions'][$this->columns['id']])
+					&& count($type_or_parameters) == 1
 					&& count($type_or_parameters['conditions']) == 1)
 				{
-					$cache_key = $this->model . '-' . key($type_or_parameters['conditions'])
-					           . '-' . current($type_or_parameters['conditions']);
+					$cache_keys     = array();
+					$sorted_records = array();
 
-					$cache_id    = $this->cache->get($cache_key);
-					$cache_field = key($type_or_parameters['conditions']);
-
-					if ($cache_id === false)
+					foreach ($type_or_parameters['conditions'][$this->columns['id']] as $id)
 					{
-						unset($cache_key);
+						$cache_keys[]        = strtoupper($this->model) . '-' . $id;
+						$sorted_records[$id] = true;
 					}
-					else
+
+					$cached        = $this->cache->get($cache_keys);
+					$partial_cache = array();
+
+					if ($cached !== false)
 					{
-						$cache_key = $this->model . '-' . $cache_id;
+						foreach ($cached as $record)
+						{
+							$partial_cache[$record['id']] = $record;
+						}
+					}
+
+					unset($cached);
+
+					foreach ($type_or_parameters['conditions'][$this->columns['id']] as $key => $id)
+					{
+						if (isset($partial_cache[$id]))
+						{
+							unset($type_or_parameters['conditions'][$this->columns['id']][$key]);
+						}
+					}
+
+					if (count($type_or_parameters['conditions'][$this->columns['id']]) == 0)
+					{
+						$cache_key = true;
+						$cached    = array_values($partial_cache);
 					}
 				}
 
@@ -447,42 +473,96 @@ class Model extends Object
 
 				$this->loadParameters($type_or_parameters);
 			}
-			elseif (is_array($parameters))
+			elseif (is_array($parameters_or_key))
 			{
-				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters['conditions']))
+				$this->prepareParameters($parameters_or_key);
+
+				if ($this->use_cache
+					&& isset($parameters_or_key['conditions'][$this->columns['id']])
+					&& count($parameters_or_key) == 1
+					&& count($parameters_or_key['conditions']) == 1)
 				{
-					$parameters['conditions'][$this->columns['is_deleted']] = '0';
+					$cache_keys     = array();
+					$sorted_records = array();
+
+					foreach ($parameters_or_key['conditions'][$this->columns['id']] as $id)
+					{
+						$cache_keys[]        = strtoupper($this->model) . '-' . $id;
+						$sorted_records[$id] = true;
+					}
+
+					$cached        = $this->cache->get($cache_keys);
+					$partial_cache = array();
+
+					if ($cached !== false)
+					{
+						foreach ($cached as $record)
+						{
+							$partial_cache[$record['id']] = $record;
+						}
+					}
+
+					unset($cached);
+
+					foreach ($parameters_or_key['conditions'][$this->columns['id']] as $key => $id)
+					{
+						if (isset($partial_cache[$id]))
+						{
+							unset($parameters_or_key['conditions'][$this->columns['id']][$key]);
+						}
+					}
+
+					if (count($parameters_or_key['conditions'][$this->columns['id']]) == 0)
+					{
+						$cache_key = true;
+						$cached    = array_values($partial_cache);
+					}
 				}
 
-				$this->loadParameters($parameters);
+				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters_or_key['conditions']))
+				{
+					$parameters_or_key['conditions'][$this->columns['is_deleted']] = '0';
+				}
+
+				$this->loadParameters($parameters_or_key);
 			}
 			elseif (ctype_digit((string)$type_or_parameters))
 			{
-				$cache_key  = $this->model . '-' . $type_or_parameters;
-				$parameters = array($this->columns['id'] => $type_or_parameters);
+				$cache_key         = strtoupper($this->model) . '-' . $type_or_parameters;
+				$parameters_or_key = array($this->columns['id'] => $type_or_parameters);
 
 				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters))
 				{
-					$parameters[$this->columns['is_deleted']] = '0';
+					$parameters_or_key[$this->columns['is_deleted']] = '0';
 				}
 
-				$this->loadParameters($parameters);
+				$this->loadParameters($parameters_or_key);
 			}
-			elseif (ctype_digit((string)$parameters))
+			elseif (ctype_digit((string)$parameters_or_key))
 			{
-				$cache_key  = $this->model . '-' . $parameters;
-				$parameters = array($this->columns['id'] => $parameters);
+				$cache_key         = strtoupper($this->model) . '-' . $parameters_or_key;
+				$parameters_or_key = array($this->columns['id'] => $parameters_or_key);
 
 				if ($this->columns['is_deleted'] && !array_key_exists($this->columns['is_deleted'], $parameters))
 				{
-					$parameters[$this->columns['is_deleted']] = '0';
+					$parameters_or_key[$this->columns['is_deleted']] = '0';
 				}
 
-				$this->loadParameters($parameters);
+				$this->loadParameters($parameters_or_key);
 			}
 			elseif ($this->columns['is_deleted'])
 			{
 				$this->loadParameters(array($this->columns['is_deleted'] => '0'));
+			}
+
+			if (is_string($parameters_or_key))
+			{
+				$passed_key = $parameters_or_key;
+			}
+
+			if (is_string($passed_key))
+			{
+				$cache_key = $passed_key;
 			}
 
 			// Starts with a basic SELECT ... FROM
@@ -504,18 +584,19 @@ class Model extends Object
 				case 'list':
 				case 'indexed':
 				default:
-					$this->generateQuery();
+					if (!isset($cache_key) || $cache_key !== true)
+					{
+						$this->generateQuery();
+					}
 					break;
 			}
 
-			$query_database = true;
-
-			if (isset($cache_key) && $this->use_cache)
+			if (isset($cache_key) && $this->use_cache && !isset($cached))
 			{
 				$cached = $this->cache->get($cache_key);
 			}
 
-			if (isset($cached) && $cached)
+			if (isset($cached) && $cached !== false)
 			{
 				$this->records = $cached;
 			}
@@ -526,9 +607,37 @@ class Model extends Object
 					(count($this->input_parameters) == 0 ? null : $this->input_parameters)
 				);
 
-				if (isset($cache_key) && $this->use_cache)
+				if (isset($partial_cache))
 				{
-					$this->cache->set($cache_key, $this->records);
+					$records = array_merge($partial_cache, $this->records);
+
+					if (isset($sorted_records))
+					{
+						foreach ($records as $record)
+						{
+							$sorted_records[$record['id']] = $record;
+						}
+
+						$records = $sorted_records;
+					}
+
+					$this->records = $records;
+				}
+
+				if ($this->use_cache)
+				{
+					if (isset($cache_key))
+					{
+						$this->cache->set($cache_key, $passed_key ? $this->records : $this->records[0]);
+					}
+					elseif (isset($cache_keys))
+					{
+						// @todo Move to Memcached extension and switch to use setMulti()
+						foreach ($this->records as $record)
+						{
+							$this->cache->set(strtoupper($this->model) . '-' . $record['id'], $record);
+						}
+					}
 				}
 			}
 
@@ -541,7 +650,7 @@ class Model extends Object
 
 				foreach ($this->records as $record)
 				{
-					// Users the first value as the key and the second as the value
+					// Uses the first value as the key and the second as the value
 					if ($type_or_parameters == 'list')
 					{
 						$list[array_shift($record)] = array_shift($record);
@@ -786,7 +895,6 @@ class Model extends Object
 				$is_true  = ($value === true);
 				$is_false = ($value === false);
 				$is_null  = ($value === null);
-
 
 				// Generates an IN statement
 				if (is_array($value) && $between == false)
@@ -1158,7 +1266,7 @@ class Model extends Object
 						}
 						else
 						{
-							$cache_keys[] = $this->model . '-' . $value;
+							$cache_keys[] = strtoupper($this->model) . '-' . $value;
 						}
 					}
 
@@ -1428,7 +1536,7 @@ class Model extends Object
 					// Clears the cache
 					if ($update && $this->use_cache)
 					{
-						$this->cache->delete($this->model . '-' . $this->record[$this->columns['id']]);
+						$this->cache->delete(strtoupper($this->model) . '-' . $this->record[$this->columns['id']]);
 					}
 
 					return $results;
@@ -1482,7 +1590,7 @@ class Model extends Object
 			// Clears the cache
 			if ($this->use_cache)
 			{
-				$this->cache->delete($this->model . '-' . $this->record[$this->columns['id']]);
+				$this->cache->delete(strtoupper($this->model) . '-' . $this->record[$this->columns['id']]);
 			}
 
 			return $results;
@@ -1495,6 +1603,33 @@ class Model extends Object
 
 	// }}}
 	// {{{ Utility Methods
+
+	/**
+	 * Prepare Parameters
+	 *
+	 * Checks if the parameters array is only integers and reconstructs the
+	 * array with the proper conditions format.
+	 *
+	 * @access private
+	 * @param  array $array parameters array, passed by reference
+	 */
+	private function prepareParameters(&$parameters)
+	{
+		$all_integers = true;
+
+		foreach ($parameters as $key => $value)
+		{
+			if (!ctype_digit((string)$key) || !ctype_digit((string)$value))
+			{
+				$all_integers = false;
+			}
+		}
+
+		if ($all_integers)
+		{
+			$parameters = array('conditions' => array($this->columns['id'] => $parameters));
+		}
+	}
 
 	/**
 	 * Load Parameters
@@ -1554,6 +1689,30 @@ class Model extends Object
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Field Values
+	 *
+	 * Pulls the value from a single field and returns an array without any
+	 * duplicates. Perfect for extracting foreign keys to use in later queries.
+	 *
+	 * @access protected
+	 * @param  string $field field we want the values for
+	 * @return array values for the passed field
+	 */
+	protected function fieldValues($field)
+	{
+		$values = array();
+
+		foreach ($this->records as $record)
+		{
+			$values[] = $record[$field];
+		}
+
+		array_unique($values);
+
+		return $values;
 	}
 
 	// }}}
