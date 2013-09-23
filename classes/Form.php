@@ -81,7 +81,7 @@ class Form extends Object
 		
 		$idAttr = '';
 		if(strpos($additional, 'id=') === false){
-			$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+			$idAttr = 'id="'.String::generateSlug($name).'"';
 		}
 
 		return '<input type="' . $type . '" name="' . $name . '" '.$idAttr. $additional . ' />';
@@ -314,7 +314,7 @@ class Form extends Object
 		
 		$idAttr = '';
 		if(strpos($additional, 'id=') === false){
-			$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+			$idAttr = 'id="'.String::generateSlug($name).'"';
 		}
 
 		return '<textarea name="' . $name . '" '. $idAttr . $additional . '>' . $value . '</textarea>';
@@ -349,7 +349,7 @@ class Form extends Object
 
 		$idAttr = '';
 		if(strpos($additional, 'id=') === false){
-			$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+			$idAttr = 'id="'.String::generateSlug($name).'"';
 		}
 
 		return '<select ' . $idAttr . ' name="' . $name . '" class="' . $classes . '"' . $additional . '>' . $this->options($options, $selected) . '</select>';
@@ -686,7 +686,7 @@ class Form extends Object
 		{
 			$idAttr = '';
 			if(strpos($additional, 'id=') === false){
-				$idAttr = 'id="'.Convert::toCamelCase($name).'"';
+				$idAttr = 'id="'.String::generateSlug($name).'"';
 			}
 
 			$html .= ($html != '' ? ' ' : '');

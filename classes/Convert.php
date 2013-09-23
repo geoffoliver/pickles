@@ -148,14 +148,6 @@ class Convert
 	}
 
 	// }}}
-
-
-	public static function toCamelCase($str){
-		if($str){
-			$str = str_replace(' ','',trim(lcfirst(ucwords(preg_replace('/[^\w]/',' ',$str))))); 
-		}
-		return $str;
-	}
 }
 
 ?>
