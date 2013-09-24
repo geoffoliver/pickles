@@ -1326,6 +1326,9 @@ class Model extends Object
 							$field_count++;
 						}
 
+						foreach($insert_fields as $nF=>$nField){
+							$insert_fields[$nF] = "`{$nField}`";
+						}
 						$values           = '(' . implode(', ', array_fill(0, $field_count, '?')) . ')';
 						$input_parameters = array();
 
@@ -1514,6 +1517,10 @@ class Model extends Object
 					{
 						$insert_fields[]    = $this->columns['created_id'];
 						$input_parameters[] = $_SESSION['__pickles']['security']['user_id'];
+					}
+					
+					foreach($insert_fields as $nF=>$nField){
+						$insert_fields[$nF] = "`{$nField}`";
 					}
 
 					$sql .= '(' . implode(', ', $insert_fields) . ') VALUES (' . implode(', ', array_fill(0, count($input_parameters), '?')) . ')';

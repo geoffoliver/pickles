@@ -37,6 +37,7 @@ define('SITE_CLASS_PATH',    SITE_PATH . 'classes/');
 define('SITE_MODEL_PATH',    SITE_PATH . 'models/');
 define('SITE_MODULE_PATH',   SITE_PATH . 'modules/');
 define('SITE_TEMPLATE_PATH', SITE_PATH . 'templates/');
+define('SITE_VENDORS_PATH',  SITE_PATH . 'vendors/');
 
 define('PRIVATE_PATH', SITE_PATH    . 'private/');
 define('LOG_PATH',     PRIVATE_PATH . 'logs/');
@@ -144,6 +145,7 @@ function __autoload($class)
 		PICKLES_CLASS_PATH => false,
 		SITE_CLASS_PATH    => false,
 		SITE_MODEL_PATH    => false,
+		SITE_VENDORS_PATH  => false,
 		SITE_MODULE_PATH   => true,
 	);
 
@@ -154,7 +156,6 @@ function __autoload($class)
 		{
 			$filename = strtolower(preg_replace('/([A-Z]{1})/', '-$1', $filename));;
 		}
-
 		if (file_exists($path . $filename))
 		{
 			$loaded = require_once $path . $filename;
