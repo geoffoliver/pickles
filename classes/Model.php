@@ -633,7 +633,24 @@ class Model extends Object
 				{
 					if (isset($cache_key))
 					{
-						$this->cache->set($cache_key, $passed_key ? $this->records : $this->records[0]);
+						if ($passed_key)
+						{
+							$cache_value = $this->records;
+						}
+						elseif (isset($this->records[0]))
+						{
+							$cache_value = $this->records[0];
+						}
+
+						// Only set the value for non-empty records. Caching
+						// values that are empty could be caused by querying
+						// records that don't exist at the moment, but could
+						// exist in the future. INSERTs do not do any sort of
+						// cache invalidation at this time.
+						if (isset($cache_value))
+						{
+							$this->cache->set($cache_key, $cache_value);
+						}
 					}
 					elseif (isset($cache_keys))
 					{
@@ -1709,11 +1726,10 @@ class Model extends Object
 	 * Pulls the value from a single field and returns an array without any
 	 * duplicates. Perfect for extracting foreign keys to use in later queries.
 	 *
-	 * @access protected
 	 * @param  string $field field we want the values for
 	 * @return array values for the passed field
 	 */
-	protected function fieldValues($field)
+	public function fieldValues($field)
 	{
 		$values = array();
 
@@ -1722,9 +1738,7 @@ class Model extends Object
 			$values[] = $record[$field];
 		}
 
-		array_unique($values);
-
-		return $values;
+		return array_unique($values);
 	}
 
 	// }}}
