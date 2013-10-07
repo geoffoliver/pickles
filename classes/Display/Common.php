@@ -202,9 +202,11 @@ abstract class Display_Common extends Object
 		if($filename){
 			$tplFile = SITE_TEMPLATE_PATH.'__shared/elements/'.$filename;
 			if(file_exists($tplFile)){
+				ob_start();
 				$this->parent_template = null;
 				$this->child_template = $tplFile;
-				$el = $this->render();
+				$this->render();
+				$el = ob_get_clean();
 			}
 		}
 		return $el;

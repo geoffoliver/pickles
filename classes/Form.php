@@ -81,7 +81,7 @@ class Form extends Object
 		
 		$idAttr = '';
 		if(strpos($additional, 'id=') === false){
-			$idAttr = 'id="'.String::generateSlug($name).'"';
+			$idAttr = 'id="'.$name.'"';//String::generateSlug($name).'"';
 		}
 
 		return '<input type="' . $type . '" name="' . $name . '" '.$idAttr. $additional . ' />';
